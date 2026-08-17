@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FMGE Grandmaster Medical OS | Target Jan 9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #6366f1;
+    --primary-glow: rgba(99, 102, 241, 0.4);
+    --cyan-glow: #06b6d4;
+    --ecg-green: #10b981;
+    --ecg-green-glow: rgba(16, 185, 129, 0.35);
+    --alert-rose: #f43f5e;
+    --alert-amber: #f59e0b;
+    --clinical-purple: #a855f7;
+    
+    --bg-body: #070b14;
+    --bg-card: rgba(15, 23, 42, 0.85);
+    --bg-card-hover: rgba(30, 41, 59, 0.95);
+    --bg-card-subtle: #0f172a;
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-border-focus: rgba(99, 102, 241, 0.6);
+    
+    --text-white: #ffffff;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    
+    --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    --radius-xl: 20px;
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --radius-sm: 6px;
+    
+    --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 1px 1px var(--glass-border);
+    --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.25);
+  }
+
+  [data-theme="clinical-light"] {
+    --bg-body: #f1f5f9;
+    --bg-card: rgba(255, 255, 255, 0.92);
+    --bg-card-hover: rgba(255, 255, 255, 1);
+    --bg-card-subtle: #f8fafc;
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --glass-border-focus: rgba(99, 102, 241, 0.6);
+    --text-white: #0f172a;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0,0,0,0.08);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+  
+  body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    padding: 20px;
+    min-height: 100vh;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.18) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%);
+    background-attachment: fixed;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .container { max-width: 1600px; margin: 0 auto; }
+
+  /* ---------------- ECG HERO HEADER ---------------- */
+  .hero-monitor {
+    background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(24, 24, 27, 0.98) 100%);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: 24px 30px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+  }
+
+  [data-theme="clinical-light"] .hero-monitor {
+    background: linear-gradient(135deg, rgba(238, 242, 255, 0.98) 0%, rgba(240, 253, 250, 0.95) 50%, rgba(253, 242, 248, 0.98) 100%);
+  }
+
+  .ecg-svg-wrap {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    pointer-events: none;
+    opacity: 0.4;
+    overflow: hidden;
+  }
+  .ecg-path {
+    stroke: var(--ecg-green);
+    stroke-width: 2.5;
+    fill: none;
+    stroke-dasharray: 1200;
+    stroke-dashoffset: 1200;
+    animation: ecgSweep 4s linear infinite;
+  }
+  @keyframes ecgSweep {
+    to { stroke-dashoffset: 0; }
+  }
+
+  .hero-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-left { display: flex; align-items: center; gap: 18px; }
+  
+  .caduceus-badge {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary), var(--clinical-purple));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    box-shadow: 0 0 20px var(--primary-glow);
+    animation: heartbeat 2.5s ease-in-out infinite;
+  }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    14% { transform: scale(1.08); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.08); }
+    70% { transform: scale(1); }
+  }
+
+  .hero-title-box h1 {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: var(--text-white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-title-box p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .hero-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .countdown-display {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    padding: 10px 22px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: inset 0 0 15px rgba(99, 102, 241, 0.15);
+  }
+  [data-theme="clinical-light"] .countdown-display {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  .countdown-num {
+    font-family: var(--font-mono);
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--alert-rose);
+    text-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+    line-height: 1;
+  }
+  .countdown-lbl {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 800;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .mode-switch-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .mode-switch-btn:hover { border-color: var(--primary); transform: scale(1.05); }
+
+  /* ---------------- VITALS METRICS BAR ---------------- */
+  .vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .vital-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .vital-card:hover { transform: translateY(-3px); border-color: var(--glass-border-focus); }
+  .vital-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--card-accent, var(--primary));
+  }
+
+  .vital-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: var(--icon-bg, rgba(99, 102, 241, 0.15));
+    color: var(--icon-color, var(--primary));
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .vital-meta h4 {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .vital-meta .val {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-white);
+    margin-top: 2px;
+  }
+  .vital-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  /* ---------------- TAB NAVIGATION ---------------- */
+  .nav-bar {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 14px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+
+  .tab-item-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 10px 20px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .tab-item-btn:hover { background: var(--bg-card); color: var(--primary); }
+  .tab-item-btn.active {
+    background: linear-gradient(135deg, var(--primary), #4338ca);
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 4px 15px var(--primary-glow);
+  }
+
+  .view-panel { display: none; }
+  .view-panel.active { display: block; animation: fadeIn 0.25s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------------- CARDS & LAYOUTS ---------------- */
+  .layout-2-1 { display: grid; grid-template-columns: 2.2fr 1fr; gap: 24px; }
+  .layout-1-1 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 1080px) {
+    .layout-2-1, .layout-1-1 { grid-template-columns: 1fr; }
+  }
+
+  .med-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .med-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .med-title {
+    font-size: 16.5px;
+    font-weight: 800;
+    color: var(--text-white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ---------------- BADGES & LABELS ---------------- */
+  .badge {
+    padding: 3px 9px;
+    border-radius: var(--radius-sm);
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .badge-pre { background: rgba(6, 182, 212, 0.15); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.3); }
+  .badge-para { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+  .badge-clin { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+  .badge-hy { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+  .badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+  /* ---------------- BUTTONS ---------------- */
+  .btn-med {
+    background: linear-gradient(135deg, var(--primary), #4338ca);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px var(--primary-glow);
+  }
+  .btn-med:hover { transform: translateY(-1px); box-shadow: 0 4px 12px var(--primary-glow); }
+  
+  .btn-med-outline {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .btn-med-outline:hover { background: var(--bg-card-hover); border-color: var(--primary); color: var(--primary); }
+  .btn-sm { padding: 4px 10px; font-size: 11.5px; }
+
+  /* ---------------- TABLE DESIGNS ---------------- */
+  .table-responsive { overflow-x: auto; }
+  table.med-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  table.med-table th {
+    background: var(--bg-card-subtle);
+    color: var(--text-muted);
+    padding: 12px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 1px solid var(--glass-border);
+    text-align: left;
+    white-space: nowrap;
+  }
+  table.med-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--glass-border);
+    vertical-align: middle;
+  }
+  table.med-table tbody tr:hover { background: var(--bg-card-hover); }
+
+  /* Continuous Spaced Repetition Pill */
+  .rev-box-pill {
+    padding: 5px 6px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card-subtle);
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: 700;
+    cursor: pointer;
+    min-width: 68px;
+    transition: all 0.2s;
+    font-family: var(--font-mono);
+    display: inline-block;
+  }
+  .rev-box-pill.due-active {
+    background: rgba(244, 63, 94, 0.2);
+    border-color: var(--alert-rose);
+    color: #fca5a5;
+    animation: ecgGlow 2s infinite;
+  }
+  .rev-box-pill.done-active {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: var(--ecg-green);
+    color: #6ee7b7;
+  }
+  @keyframes ecgGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(244, 63, 94, 0.3); }
+    50% { box-shadow: 0 0 15px rgba(244, 63, 94, 0.7); }
+  }
+
+  /* ---------------- TODAY QUEUE ITEM ---------------- */
+  .today-task-card {
+    background: var(--bg-card-subtle);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+    border-left: 4px solid var(--primary);
+  }
+  .today-task-card:hover { border-color: var(--primary); transform: translateX(3px); }
+  .today-task-card.completed { opacity: 0.55; text-decoration: line-through; border-left-color: var(--ecg-green); }
+
+  /* ---------------- SOUND STUDIO & POMODORO ---------------- */
+  .audio-studio-card {
+    background: linear-gradient(135deg, rgba(24, 24, 37, 0.95), rgba(49, 46, 129, 0.85));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .pomo-digital-clock {
+    font-family: var(--font-mono);
+    font-size: 48px;
+    font-weight: 900;
+    text-align: center;
+    color: #ffffff;
+    margin: 10px 0;
+    text-shadow: 0 0 20px var(--primary-glow);
+    letter-spacing: 2px;
+  }
+  .sound-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .sound-btn-synth {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-white);
+    padding: 8px 4px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .sound-btn-synth.playing {
+    background: var(--alert-rose) !important;
+    border-color: var(--alert-rose) !important;
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.6) !important;
+  }
+
+  /* ---------------- 20TH NOTEBOOK FLASHCARD & VAULT ---------------- */
+  .flashcard-deck {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .vault-flashcard {
+    background: var(--bg-card-subtle);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .vault-flashcard:hover { transform: translateY(-2px); border-color: var(--glass-border-focus); }
+  .flashcard-topic {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--cyan-glow);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .flashcard-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-white);
+    margin-bottom: 8px;
+  }
+  .flashcard-body {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  /* ---------------- CALENDAR VIEW ---------------- */
+  .cal-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .cal-matrix-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .cal-th-day { text-align: center; font-size: 11px; font-weight: 800; color: var(--text-muted); padding: 6px 0; text-transform: uppercase; }
+  .cal-day-box {
+    background: var(--bg-card-subtle);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    min-height: 100px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+  }
+  .cal-day-box.is-today {
+    border: 2px solid var(--primary);
+    background: rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+  }
+  .cal-day-box.other-month { opacity: 0.3; }
+  .cal-day-num { font-family: var(--font-mono); font-size: 11.5px; font-weight: 800; margin-bottom: 4px; }
+  
+  .cal-event-pill {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 4px;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ev-r1 { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border-left: 2px solid #3b82f6; }
+  .ev-r2 { background: rgba(245, 158, 11, 0.25); color: #fcd34d; border-left: 2px solid #f59e0b; }
+  .ev-r3 { background: rgba(99, 102, 241, 0.25); color: #c7d2fe; border-left: 2px solid #6366f1; }
+  .ev-r4 { background: rgba(236, 72, 153, 0.25); color: #fbcfe8; border-left: 2px solid #ec4899; }
+  .ev-r5plus { background: rgba(16, 185, 129, 0.25); color: #a7f3d0; border-left: 2px solid #10b981; }
+  .ev-exam { background: rgba(244, 63, 94, 0.35); color: #fecdd3; border-left: 3px solid #f43f5e; font-weight: 900; }
+
+  /* ---------------- HABIT DOTS ---------------- */
+  .habit-row-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--glass-border);
+  }
+  .habit-dots-box { display: flex; gap: 6px; }
+  .h-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .h-dot.active { background: var(--ecg-green); color: white; border-color: var(--ecg-green); box-shadow: 0 0 8px var(--ecg-green-glow); }
+
+  /* ---------------- MODAL ---------------- */
+  .modal-overlay-bg {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-box-window {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border-focus);
+    border-radius: var(--radius-xl);
+    padding: 28px;
+    max-width: 520px;
+    width: 90%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  }
+  
+  /* Form Inputs */
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border);
+    background: var(--bg-card-subtle);
+    color: var(--text-white);
+    font-size: 13px;
+    margin-top: 5px;
+    outline: none;
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+</style>
+</head>
+<body data-theme="clinical-dark">
+
+<div class="container">
+
+  <!-- ==================== HERO ECG MONITOR ==================== -->
+  <div class="hero-monitor">
+    <div class="ecg-svg-wrap">
+      <svg viewBox="0 0 1200 60" preserveAspectRatio="none" style="width:100%; height:100%;">
+        <path class="ecg-path" d="M0,30 L150,30 L160,10 L170,50 L180,25 L190,35 L200,30 L350,30 L360,5 L370,55 L380,20 L390,40 L400,30 L550,30 L560,10 L570,50 L580,25 L590,35 L600,30 L750,30 L760,5 L770,55 L780,20 L790,40 L800,30 L950,30 L960,10 L970,50 L980,25 L990,35 L1000,30 L1200,30" />
+      </svg>
+    </div>
+
+    <div class="hero-flex">
+      <div class="hero-left">
+        <div class="caduceus-badge">🩺</div>
+        <div class="hero-title-box">
+          <h1>FMGE Grandmaster Command OS</h1>
+          <p>🎯 Target: <strong>January 9</strong> • Continuous 1-4-7-21-7-21 Loop Recall • 300 Marks Blueprint</p>
+        </div>
+      </div>
+
+      <div class="hero-right-actions">
+        <div class="countdown-display">
+          <div class="countdown-num" id="examDaysCount">--</div>
+          <div class="countdown-lbl">Days to Jan 9 Exam</div>
+        </div>
+        <button class="btn-med" id="installAppBtn" type="button" onclick="installFMGEApp()" style="display:none;">📲 Install App</button>
+        <button class="mode-switch-btn" onclick="toggleThemeMode()" title="Toggle Dark/Light Mode">🌓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VITALS METRICS BAR ==================== -->
+  <div class="vitals-grid">
+    <div class="vital-card" style="--card-accent: #6366f1; --icon-bg: rgba(99, 102, 241, 0.15); --icon-color: #818cf8;">
+      <div class="vital-icon">📊</div>
+      <div class="vital-meta">
+        <h4>Syllabus Marks Covered</h4>
+        <div class="val" id="vitalMarks">0 / 300</div>
+        <div class="vital-sub" id="vitalMarksPercent">0% Completed</div>
+      </div>
+    </div>
+
+    <div class="vital-card" style="--card-accent: #06b6d4; --icon-bg: rgba(6, 182, 212, 0.15); --icon-color: #22d3ee;">
+      <div class="vital-icon">📚</div>
+      <div class="vital-meta">
+        <h4>19 Subjects Status</h4>
+        <div class="val" id="vitalSubjects">0 / 19</div>
+        <div class="vital-sub">Classes Completed</div>
+      </div>
+    </div>
+
+    <div class="vital-card" style="--card-accent: #f43f5e; --icon-bg: rgba(244, 63, 94, 0.15); --icon-color: #fb7185;">
+      <div class="vital-icon">⚡</div>
+      <div class="vital-meta">
+        <h4>Today's Revision Queue</h4>
+        <div class="val" id="vitalDueToday">0</div>
+        <div class="vital-sub" id="vitalOverdueSub">0 Overdue topics</div>
+      </div>
+    </div>
+
+    <div class="vital-card" style="--card-accent: #10b981; --icon-bg: rgba(16, 185, 129, 0.15); --icon-color: #34d399;">
+      <div class="vital-icon">🎯</div>
+      <div class="vital-meta">
+        <h4>MCQs Mastered</h4>
+        <div class="val" id="vitalMCQs">0</div>
+        <div class="vital-sub">Target: 75+ / day</div>
+      </div>
+    </div>
+
+    <div class="vital-card" style="--card-accent: #a855f7; --icon-bg: rgba(168, 85, 247, 0.15); --icon-color: #c084fc;">
+      <div class="vital-icon">🏆</div>
+      <div class="vital-meta">
+        <h4>Latest Grand Test</h4>
+        <div class="val" id="vitalGTScore">-- / 300</div>
+        <div class="vital-sub">Passing Mark: &ge; 150</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB NAVIGATION ==================== -->
+  <div class="nav-bar">
+    <button class="tab-item-btn active" onclick="showTab(event, 'tab-hub')">⚡ Daily Command Hub</button>
+    <button class="tab-item-btn" onclick="showTab(event, 'tab-matrix')">📚 19 Subjects & Continuous Recall (R1–R8+)</button>
+    <button class="tab-item-btn" onclick="showTab(event, 'tab-calendar')">🗓️ Master Spaced Calendar</button>
+    <button class="tab-item-btn" onclick="showTab(event, 'tab-vault')">📓 20th Notebook & Mistakes</button>
+    <button class="tab-item-btn" onclick="showTab(event, 'tab-analytics')">📈 Grand Tests & MCQ Lab</button>
+  </div>
+
+  <!-- ==================== TAB 1: DAILY COMMAND HUB ==================== -->
+  <div id="tab-hub" class="view-panel active">
+    <div class="layout-2-1">
+      <div>
+        <!-- Today's Spaced Revision Task Queue -->
+        <div class="med-card">
+          <div class="med-header">
+            <div class="med-title">🔥 Today's Spaced Revision Prescription <span class="badge badge-hy" id="badgeTodayDate">Today</span></div>
+            <button class="btn-med-outline btn-sm" onclick="renderHubQueue()">🔄 Refresh Queue</button>
+          </div>
+          <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:14px;">
+            Continuous Active Recall Loop Engine: <strong>R1 (+1d) &rarr; R2 (+4d) &rarr; R3 (+7d) &rarr; R4 (+21d) &rarr; R5 (+28d) &rarr; R6 (+49d) &rarr; R7 (+56d) &rarr; R8 (+77d)...</strong>
+          </p>
+          <div id="hubQueueContainer"></div>
+        </div>
+
+        <!-- Today's MCQ Session Log -->
+        <div class="med-card">
+          <div class="med-header">
+            <div class="med-title">🎯 Daily MCQ & Mistake Book Session</div>
+            <span class="badge badge-success">High Yield Habit</span>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1.2fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-muted);">MCQs Solved</label>
+              <input type="number" id="quickMCQCount" placeholder="e.g. 75">
+            </div>
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Correct</label>
+              <input type="number" id="quickMCQCorrect" placeholder="e.g. 58">
+            </div>
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Subject</label>
+              <input type="text" id="quickMCQSub" placeholder="e.g. FMT / PSM">
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+              <button class="btn-med" style="width:100%; justify-content:center;" onclick="logQuickMCQ()">➕ Save MCQs</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Habits -->
+        <div class="med-card">
+          <div class="med-header">
+            <div class="med-title">✨ FMGE Topper Consistency Protocol</div>
+            <button class="btn-med-outline btn-sm" onclick="resetHabitsWeek()">Reset Week</button>
+          </div>
+          <div id="habitsListContainer"></div>
+        </div>
+      </div>
+
+      <!-- Right Column: Sound Studio & Daily Rhythm -->
+      <div>
+        <div class="audio-studio-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:14px; font-weight:800; color:white;">⏱️ Focus Sound Studio</div>
+            <span class="badge badge-success">Offline Synth</span>
+          </div>
+          <div class="pomo-digital-clock" id="pomoTimeClock">25:00</div>
+          <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+            <button class="btn-med" id="pomoBtnAction" onclick="togglePomodoroState()">Start Focus</button>
+            <button class="btn-med-outline" style="color:white; border-color:rgba(255,255,255,0.3);" onclick="setPomodoroTime(25)">25m</button>
+            <button class="btn-med-outline" style="color:white; border-color:rgba(255,255,255,0.3);" onclick="setPomodoroTime(50)">50m</button>
+            <button class="btn-med-outline" style="color:white; border-color:rgba(255,255,255,0.3);" onclick="setPomodoroTime(10)">Break</button>
+          </div>
+          <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:rgba(255,255,255,0.7); letter-spacing:0.8px;">
+            Ambient Audio Synthesizer
+          </div>
+          <div class="sound-selector-grid">
+            <button class="sound-btn-synth" id="sndRain" onclick="playAudioMode('rain')">🌧️ Rain</button>
+            <button class="sound-btn-synth" id="sndWhite" onclick="playAudioMode('white')">📻 White</button>
+            <button class="sound-btn-synth" id="sndHeart" onclick="playAudioMode('heart')">💓 Heartbeat</button>
+            <button class="sound-btn-synth" id="sndBeta" onclick="playAudioMode('beta')">🧠 40Hz Beta</button>
+          </div>
+        </div>
+
+        <div class="med-card">
+          <div class="med-header">
+            <div class="med-title">⏰ Golden FMGE Daily Timetable</div>
+          </div>
+          <div style="font-size:13px;">
+            <div style="display:flex; gap:10px; padding:9px 0; border-bottom:1px dashed var(--glass-border);">
+              <span style="font-family:var(--font-mono); font-weight:800; color:var(--primary); width:90px;">07:00-08:30</span>
+              <span>🌅 Active Recall & 20th Notebook Volatiles</span>
+            </div>
+            <div style="display:flex; gap:10px; padding:9px 0; border-bottom:1px dashed var(--glass-border);">
+              <span style="font-family:var(--font-mono); font-weight:800; color:var(--primary); width:90px;">08:30-13:30</span>
+              <span>📖 Main Theory Video Modules</span>
+            </div>
+            <div style="display:flex; gap:10px; padding:9px 0; border-bottom:1px dashed var(--glass-border);">
+              <span style="font-family:var(--font-mono); font-weight:800; color:var(--primary); width:90px;">14:30-17:00</span>
+              <span>🎯 75 QBank MCQs + Mistake Review</span>
+            </div>
+            <div style="display:flex; gap:10px; padding:9px 0; border-bottom:1px dashed var(--glass-border);">
+              <span style="font-family:var(--font-mono); font-weight:800; color:var(--primary); width:90px;">17:30-20:00</span>
+              <span>🔄 Spaced Revision Queue (R1/R2/R3/R4/R5+)</span>
+            </div>
+            <div style="display:flex; gap:10px; padding:9px 0;">
+              <span style="font-family:var(--font-mono); font-weight:800; color:var(--primary); width:90px;">21:00-23:00</span>
+              <span>🔬 BTR & Image-Based Question Drills</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: 19 SUBJECTS & 300M BLUEPRINT ==================== -->
+  <div id="tab-matrix" class="view-panel">
+    <div class="med-card">
+      <div class="med-header">
+        <div>
+          <div class="med-title">📚 Master 19 Subject Matrix (Continuous Revision Loops R1 &rarr; R8+)</div>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:3px;">
+            The interval loops dynamically: <strong>+1d &rarr; +4d &rarr; +7d &rarr; +21d &rarr; +7d (+28d) &rarr; +21d (+49d) &rarr; +7d (+56d) &rarr; +21d (+77d)...</strong>
+          </p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn-med-outline btn-sm" onclick="filterSubjectsByPhase('all')">All (300M)</button>
+          <button class="btn-med-outline btn-sm" onclick="filterSubjectsByPhase('Pre-Clinical')">Pre (51M)</button>
+          <button class="btn-med-outline btn-sm" onclick="filterSubjectsByPhase('Para-Clinical')">Para (49M)</button>
+          <button class="btn-med-outline btn-sm" onclick="filterSubjectsByPhase('Clinical')">Clinical (200M)</button>
+          <button class="btn-med-outline btn-sm" onclick="exportDataJson()">💾 Backup</button>
+          <button class="btn-med-outline btn-sm" onclick="importDataJsonPrompt()">📥 Restore</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="med-table" id="masterSubjectTable">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Marks</th>
+              <th>Phase</th>
+              <th>Status / Finished</th>
+              <th>R1 (+1d)</th>
+              <th>R2 (+4d)</th>
+              <th>R3 (+7d)</th>
+              <th>R4 (+21d)</th>
+              <th>R5 (+28d)</th>
+              <th>R6 (+49d)</th>
+              <th>R7 (+56d)</th>
+              <th>R8 (+77d)</th>
+              <th>Key Focus Concepts</th>
+            </tr>
+          </thead>
+          <tbody id="masterSubjectTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 3: CALENDAR ENGINE ==================== -->
+  <div id="tab-calendar" class="view-panel">
+    <div class="med-card">
+      <div class="cal-header-flex">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="btn-med-outline btn-sm" onclick="shiftCalendarMonth(-1)">◀ Prev</button>
+          <h2 id="calendarMonthTitle" style="font-size:16px; font-weight:800; min-width:180px; text-align:center; color:var(--text-white);">Month Year</h2>
+          <button class="btn-med-outline btn-sm" onclick="shiftCalendarMonth(1)">Next ▶</button>
+          <button class="btn-med-outline btn-sm" onclick="resetCalendarToToday()">Today</button>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; font-size:11px;">
+          <span class="badge ev-r1">R1 (+1d)</span>
+          <span class="badge ev-r2">R2 (+4d)</span>
+          <span class="badge ev-r3">R3 (+7d)</span>
+          <span class="badge ev-r4">R4 (+21d)</span>
+          <span class="badge ev-r5plus">R5+ (7/21d Loops)</span>
+          <span class="badge ev-exam">🏆 Exam Jan 9</span>
+        </div>
+      </div>
+
+      <div class="cal-matrix-grid">
+        <div class="cal-th-day">Sun</div>
+        <div class="cal-th-day">Mon</div>
+        <div class="cal-th-day">Tue</div>
+        <div class="cal-th-day">Wed</div>
+        <div class="cal-th-day">Thu</div>
+        <div class="cal-th-day">Fri</div>
+        <div class="cal-th-day">Sat</div>
+      </div>
+      <div class="cal-matrix-grid" id="calendarDaysContainer"></div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 4: 20TH NOTEBOOK / MISTAKE VAULT ==================== -->
+  <div id="tab-vault" class="view-panel">
+    <div class="med-card">
+      <div class="med-header">
+        <div>
+          <div class="med-title">📓 The 20th Notebook & Active Recall Vault</div>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+            Keep all high-yield volatile facts, Drug of Choices (DOC), Triads, Antidotes, and your repeat MCQ mistakes in one place.
+          </p>
+        </div>
+        <button class="btn-med" onclick="openVaultModal()">➕ Add Volatile Fact / Mistake</button>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+        <input type="text" id="vaultSearchQuery" placeholder="🔍 Search Drug of Choice, syndrome, vaccine, IPC..." oninput="renderVaultDeck()" style="flex:1; min-width:200px;">
+        <select id="vaultSubjectDropdown" onchange="renderVaultDeck()" style="width:200px;">
+          <option value="ALL">All Subjects</option>
+        </select>
+      </div>
+
+      <div class="flashcard-deck" id="vaultCardsContainer"></div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 5: GRAND TESTS & MCQ LAB ==================== -->
+  <div id="tab-analytics" class="view-panel">
+    <div class="layout-1-1">
+      <div class="med-card">
+        <div class="med-header">
+          <div class="med-title">📝 Record Grand Test (GT) / Mock</div>
+          <span class="badge badge-hy">Target: &ge; 150 / 300</span>
+        </div>
+        <form id="gtFormRecord" onsubmit="saveGrandTest(event)">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Test Name / Platform</label>
+              <input type="text" id="gtFormName" placeholder="e.g. Marrow GT 12 / Pre-FMGE" required>
+            </div>
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Date Taken</label>
+              <input type="date" id="gtFormDate" required>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Total Score (/300)</label>
+              <input type="number" id="gtFormScore" min="0" max="300" placeholder="e.g. 172" required>
+            </div>
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Paper 1 (/100)</label>
+              <input type="number" id="gtFormP1" placeholder="e.g. 62">
+            </div>
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Paper 2 (/200)</label>
+              <input type="number" id="gtFormP2" placeholder="e.g. 110">
+            </div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Weak Subject Focus / Mistakes Noted</label>
+            <input type="text" id="gtFormWeak" placeholder="e.g. PSM epidemiology calculations, FMT poison antidotes, Pharma autonomics">
+          </div>
+          <button type="submit" class="btn-med">💾 Record GT Result</button>
+        </form>
+      </div>
+
+      <div class="med-card">
+        <div class="med-header">
+          <div class="med-title">📊 GT Progress & History</div>
+        </div>
+        <div class="table-responsive">
+          <table class="med-table">
+            <thead>
+              <tr>
+                <th>Test</th>
+                <th>Date</th>
+                <th>Score</th>
+                <th>Paper 1/2</th>
+                <th>Result</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="gtTableHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== MODAL: ADD VOLATILE FACT ==================== -->
+<div class="modal-overlay-bg" id="vaultAddModal">
+  <div class="modal-box-window">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="font-size:16px; font-weight:800; color:var(--text-white);">➕ Add to 20th Notebook</h3>
+      <button onclick="closeVaultModal()" style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted);">✕</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Subject</label>
+      <select id="modalInputSubject"></select>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Topic / Triad / Drug Category</label>
+      <input type="text" id="modalInputTitle" placeholder="e.g. DOC for Anaphylaxis / Starry Sky Pattern / IPC 304A">
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:11px; font-weight:700; color:var(--text-muted);">High-Yield Volatile Points</label>
+      <textarea id="modalInputContent" rows="4" placeholder="Write down exact keywords, doses, formulas, or mistake notes..."></textarea>
+    </div>
+    <button class="btn-med" style="width:100%; justify-content:center;" onclick="saveVaultItem()">💾 Save to Vault</button>
+  </div>
+</div>
+
+<!-- ==================== SCRIPT ENGINE ==================== -->
+<script>
+// ALL 19 SUBJECTS WITH ICONS, WEIGHTAGE & HIGH-YIELD POINTS
+const default19Subjects = [
+  { id: 1, icon: "🩺", name: "General Medicine", marks: 33, phase: "Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "ECGs (STEMI, Arrhythmias), Neurology stroke scales, Nephrotic vs Nephritic, Diabetes/HTN guidelines, TB Regimens (NTEP)" },
+  { id: 2, icon: "🔪", name: "General Surgery", marks: 32, phase: "Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Trauma ATLS ABCDE, Parkland Burns formula, Breast/Thyroid malignancies, Appendicitis, Hernias, Shock types" },
+  { id: 3, icon: "🤰", name: "Obstetrics & Gynaecology", marks: 30, phase: "Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Partograph, PPH management (Atonic #1), Eclampsia (Pritchard MgSO4), Cervical cancer FIGO staging, Contraception" },
+  { id: 4, icon: "🌐", name: "PSM (Community Medicine)", marks: 30, phase: "Para-Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Epidemiology formulas (Sensitivity, Specificity, Odds Ratio), National Immunization Schedule (NIS), Biostats nomogram" },
+  { id: 5, icon: "🦴", name: "Anatomy", marks: 17, phase: "Pre-Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Brachial plexus & nerve injuries, Pharyngeal arches, Circle of Willis neurovascular supply, Inguinal canal" },
+  { id: 6, icon: "⚡", name: "Physiology", marks: 17, phase: "Pre-Clinical", highYield: false, completed: false, completedDate: null, revs: {}, topics: "Cardiac cycle (Wiggers diagram), Acid-base balance nomogram, Renal transport channels, Lung compliance loops" },
+  { id: 7, icon: "🧬", name: "Biochemistry", marks: 17, phase: "Pre-Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Metabolic cycles & rate-limiting enzymes, Inborn errors of amino acids (PKU, Maple syrup), Glycogen storage diseases, Vitamins" },
+  { id: 8, icon: "👶", name: "Pediatrics", marks: 15, phase: "Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Developmental milestones, Neonatal resuscitation (NRP 2020), Severe Acute Malnutrition (SAM), Congenital heart defects" },
+  { id: 9, icon: "👁️", name: "Ophthalmology", marks: 15, phase: "Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Cataract surgeries, Glaucoma drugs, Diabetic retinopathy classification, Corneal ulcers (Bacterial vs Fungal vs Acanthamoeba)" },
+  { id: 10, icon: "👂", name: "ENT (Otorhinolaryngology)", marks: 15, phase: "Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Audiograms (Pure Tone), CSOM Safe vs Unsafe (Cholesteatoma), Epistaxis (Kiesselbach plexus), Stridor causes, Laryngeal paralysis" },
+  { id: 11, icon: "🔬", name: "Pathology", marks: 13, phase: "Para-Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Neoplasia tumor markers & cytogenetics (t(9;22), t(8;14)), Leukemias/Lymphomas, Glomerulonephritis electron microscopy" },
+  { id: 12, icon: "💊", name: "Pharmacology", marks: 13, phase: "Para-Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Autonomic receptors, Antimicrobials mechanism & adverse effects, Anti-arrhythmics (Vaughan Williams), Toxicology antidotes" },
+  { id: 13, icon: "🧫", name: "Microbiology", marks: 13, phase: "Para-Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Parasitology egg stages, Hepatitis B serology markers, Mycology fungal stains, Culture media, Type I-IV Hypersensitivity" },
+  { id: 14, icon: "💀", name: "Forensic Medicine (FMT)", marks: 10, phase: "Para-Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Thanatology postmortem lividity/rigor, Toxicology (OPC, Aluminum Phosphide, Snake venom), IPC sections (304A, 320 grievous hurt)" },
+  { id: 15, icon: "🦾", name: "Orthopedics", marks: 5, phase: "Clinical", highYield: false, completed: false, completedDate: null, revs: {}, topics: "Colles vs Smith vs Barton fracture, Pediatric hip disorders (DDH, Perthes, SCFE), Bone tumors X-ray signs (Codman triangle, Sunburst)" },
+  { id: 16, icon: "🧴", name: "Dermatology & STD", marks: 5, phase: "Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Image diagnosis (Pemphigus vulgaris vs Bullous, Psoriasis), Syphilis stages/treatment kits, Leprosy Ridley-Jopling" },
+  { id: 17, icon: "🧠", name: "Psychiatry", marks: 5, phase: "Clinical", highYield: false, completed: false, completedDate: null, revs: {}, topics: "Schizophrenia Schneider first-rank symptoms, Depression/Bipolar criteria, Defense mechanisms, Substance withdrawal" },
+  { id: 18, icon: "☢️", name: "Radiology", marks: 5, phase: "Clinical", highYield: true, completed: false, completedDate: null, revs: {}, topics: "Classic chest X-Ray signs (Silhouette, Sail sign, Batwing), Head CT bleed patterns (EDH biconvex vs SDH crescentic), Contrast safety" },
+  { id: 19, icon: "💉", name: "Anesthesia", marks: 5, phase: "Clinical", highYield: false, completed: false, completedDate: null, revs: {}, topics: "Mallampati airway classification, IV & Inhalational agents (MAC), CPR ACLS algorithms, Spinal vs Epidural levels" }
+];
+
+const defaultVaultFlashcards = [
+  { id: 1, subject: "Pharmacology", title: "DOC for Anaphylactic Shock", content: "Intramuscular Adrenaline (1:1000) given in the anterolateral aspect of the mid-thigh. Adult dose: 0.5 mg (0.5 mL)." },
+  { id: 2, subject: "Forensic Medicine (FMT)", title: "Garlic Odor of Poisons", content: "Classic garlic breath: Organophosphates (OPC), Arsenic, Phosphorus, and Thallium." },
+  { id: 3, subject: "Pathology", title: "Starry Sky Appearance", content: "Burkitt Lymphoma: t(8;14) c-myc translocation, associated with Epstein-Barr Virus (EBV). Macrophages ingesting apoptotic cells form the 'stars'." },
+  { id: 4, subject: "PSM (Community Medicine)", title: "National Immunization (Birth Vaccines)", content: "1. BCG: 0.05 ml intradermal, left upper arm\n2. OPV zero dose: 2 drops oral\n3. Hepatitis B birth dose: 0.5 ml IM, anterolateral thigh (within 24 hrs)." },
+  { id: 5, subject: "Obstetrics & Gynaecology", title: "Postpartum Hemorrhage (PPH) Step 1", content: "Blood loss >500 mL in vaginal delivery or >1000 mL in CS. #1 cause: Atonic uterus (80%). First line: Uterine massage + Oxytocin 10 IU IM/IV." },
+  { id: 6, subject: "General Medicine", title: "Sgarbossa Criteria for LBBB MI", content: "Concordant ST elevation >= 1 mm (5 pts), Concordant ST depression >= 1 mm in V1-V3 (3 pts), Excessively discordant STE >= 5 mm (2 pts)." }
+];
+
+const defaultHabitList = [
+  { id: 1, name: "Complete Daily Theory / Video Module", days: [false, false, false, false, false, false, false] },
+  { id: 2, name: "Solve 75+ QBank MCQs + Mistake Review", days: [false, false, false, false, false, false, false] },
+  { id: 3, name: "Clear Today's Spaced Revision Queue", days: [false, false, false, false, false, false, false] },
+  { id: 4, name: "Review 20th Notebook Volatile Facts (30m)", days: [false, false, false, false, false, false, false] }
+];
+
+let subjects = JSON.parse(localStorage.getItem("fmge_sub_v5")) || default19Subjects;
+let vaultCards = JSON.parse(localStorage.getItem("fmge_vault_v5")) || defaultVaultFlashcards;
+let grandTests = JSON.parse(localStorage.getItem("fmge_gt_v5")) || [];
+let habits = JSON.parse(localStorage.getItem("fmge_habits_v5")) || defaultHabitList;
+let totalMCQMastered = parseInt(localStorage.getItem("fmge_mcq_v5")) || 0;
+let currentPhaseFilter = 'all';
+
+let calDateState = new Date();
+
+// DYNAMIC INTERVAL FORMULA: 1, 4, 7, 21, then alternating +7, +21, +7, +21...
+function getRevisionOffsetDays(stageNum) {
+  if (stageNum === 1) return 1;
+  if (stageNum === 2) return 4;
+  if (stageNum === 3) return 7;
+  if (stageNum === 4) return 21;
+  
+  let currentOffset = 21;
+  for (let k = 5; k <= stageNum; k++) {
+    if ((k - 4) % 2 === 1) {
+      currentOffset += 7; // R5 (+28d), R7 (+56d), R9 (+84d)...
+    } else {
+      currentOffset += 21; // R6 (+49d), R8 (+77d), R10 (+105d)...
+    }
+  }
+  return currentOffset;
+}
+
+// INITIALIZE
+document.addEventListener("DOMContentLoaded", () => {
+  calcCountdown();
+  renderSubjectTable();
+  renderHubQueue();
+  renderHabitsList();
+  renderVaultDeck();
+  renderGTTable();
+  renderCalendarGrid();
+  populateVaultSubjectOptions();
+  updateVitalsBar();
+
+  const gtDateInput = document.getElementById("gtFormDate");
+  if (gtDateInput) gtDateInput.valueAsDate = new Date();
+  
+  const badgeDate = document.getElementById("badgeTodayDate");
+  if (badgeDate) {
+    const dateOpts = { weekday: 'short', month: 'short', day: 'numeric' };
+    badgeDate.innerText = new Date().toLocaleDateString('en-US', dateOpts);
+  }
+});
+
+// SAVE STATE
+function saveAllState() {
+  localStorage.setItem("fmge_sub_v5", JSON.stringify(subjects));
+  localStorage.setItem("fmge_vault_v5", JSON.stringify(vaultCards));
+  localStorage.setItem("fmge_gt_v5", JSON.stringify(grandTests));
+  localStorage.setItem("fmge_habits_v5", JSON.stringify(habits));
+  localStorage.setItem("fmge_mcq_v5", totalMCQMastered.toString());
+  updateVitalsBar();
+}
+
+// COUNTDOWN
+function calcCountdown() {
+  const now = new Date();
+  let examYear = now.getFullYear();
+  let examDate = new Date(examYear, 0, 9);
+  if (now > examDate) examDate = new Date(examYear + 1, 0, 9);
+  const diff = Math.ceil((examDate - now) / (1000 * 60 * 60 * 24));
+  const el = document.getElementById("examDaysCount");
+  if (el) el.innerText = diff;
+}
+
+// THEME
+function toggleThemeMode() {
+  const cur = document.body.getAttribute("data-theme");
+  document.body.setAttribute("data-theme", cur === "clinical-dark" ? "clinical-light" : "clinical-dark");
+}
+
+// TAB SWITCHING
+function showTab(e, tabId) {
+  if (e && e.currentTarget) {
+    document.querySelectorAll(".tab-item-btn").forEach(b => b.classList.remove("active"));
+    e.currentTarget.classList.add("active");
+  }
+  document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add("active");
+  
+  if (tabId === 'tab-calendar') renderCalendarGrid();
+  if (tabId === 'tab-hub') renderHubQueue();
+}
+
+// DATE UTILS
+function addDays(dStr, n) {
+  if (!dStr) return null;
+  const d = new Date(dStr);
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split('T')[0];
+}
+
+function formatDateShort(dStr) {
+  if (!dStr) return "-";
+  const parts = dStr.split('-');
+  return new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function isDateToday(dStr) { return dStr === new Date().toISOString().split('T')[0]; }
+function isDateOverdue(dStr) { return dStr < new Date().toISOString().split('T')[0]; }
+
+// CONTINUOUS LOOP REVISION TABLE
+function renderSubjectTable() {
+  const tbody = document.getElementById("masterSubjectTableBody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  const filtered = subjects.filter(s => currentPhaseFilter === 'all' || s.phase === currentPhaseFilter);
+
+  filtered.forEach(s => {
+    if (!s.revs) s.revs = {};
+    let pBadge = "badge-pre";
+    if (s.phase === "Para-Clinical") pBadge = "badge-para";
+    if (s.phase === "Clinical") pBadge = "badge-clin";
+
+    let rowCells = "";
+    for (let r = 1; r <= 8; r++) {
+      const offset = getRevisionOffsetDays(r);
+      const d = addDays(s.completedDate, offset);
+      const isDone = !!s.revs[r];
+      rowCells += `<td>${renderRevisionBoxPill(s.id, r, d, isDone, s.completed)}</td>`;
+    }
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>
+        <div style="font-weight:800; font-size:13.5px; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">${s.icon}</span>
+          ${s.name}
+          ${s.highYield ? '<span class="badge badge-hy">HY</span>' : ''}
+        </div>
+      </td>
+      <td><strong style="color:var(--primary); font-size:13.5px; font-family:var(--font-mono);">${s.marks}M</strong></td>
+      <td><span class="badge ${pBadge}">${s.phase}</span></td>
+      <td>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button class="btn-med btn-sm" style="${s.completed ? 'background:var(--ecg-green);' : ''}" onclick="toggleFinishSubjectClass(${s.id})">
+            ${s.completed ? '✓ Done' : '⭕ Mark Finished'}
+          </button>
+          ${s.completedDate ? `<input type="date" value="${s.completedDate}" onchange="changeClassFinishDate(${s.id}, this.value)" style="padding:2px 4px; font-size:11px; width:auto;">` : ''}
+        </div>
+      </td>
+      ${rowCells}
+      <td><div style="font-size:11px; color:var(--text-muted); max-width:220px; line-height:1.35;">${s.topics}</div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderRevisionBoxPill(subId, rNum, dStr, isDone, isSubDone) {
+  if (!isSubDone || !dStr) return `<span style="color:var(--text-dim); font-size:11px;">-</span>`;
+  const due = isDateToday(dStr);
+  const overdue = isDateOverdue(dStr) && !isDone;
+
+  let cls = "rev-box-pill";
+  if (isDone) cls += " done-active";
+  else if (due || overdue) cls += " due-active";
+
+  return `
+    <div class="${cls}" onclick="toggleRevStage(${subId}, ${rNum})">
+      <div>${formatDateShort(dStr)}</div>
+      <div style="font-size:8px; opacity:0.9;">${isDone ? '✅ Done' : (due ? '🔥 Today' : (overdue ? '⚠️ Overdue' : 'Pending'))}</div>
+    </div>
+  `;
+}
+
+function toggleFinishSubjectClass(id) {
+  const s = subjects.find(x => x.id === id);
+  if (!s) return;
+  if (!s.completed) {
+    s.completed = true;
+    s.completedDate = new Date().toISOString().split('T')[0];
+    s.revs = {};
+  } else {
+    if (confirm(`Reset completion status for ${s.name}?`)) {
+      s.completed = false;
+      s.completedDate = null;
+      s.revs = {};
+    }
+  }
+  saveAllState();
+  renderSubjectTable();
+  renderHubQueue();
+  renderCalendarGrid();
+}
+
+function changeClassFinishDate(id, val) {
+  const s = subjects.find(x => x.id === id);
+  if (!s) return;
+  s.completedDate = val;
+  saveAllState();
+  renderSubjectTable();
+  renderHubQueue();
+  renderCalendarGrid();
+}
+
+function toggleRevStage(id, rNum) {
+  const s = subjects.find(x => x.id === id);
+  if (!s) return;
+  if (!s.revs) s.revs = {};
+  s.revs[rNum] = !s.revs[rNum];
+  saveAllState();
+  renderSubjectTable();
+  renderHubQueue();
+  renderCalendarGrid();
+}
+
+function filterSubjectsByPhase(ph) {
+  currentPhaseFilter = ph;
+  renderSubjectTable();
+}
+
+// RENDER TODAY HUB QUEUE (Checks R1 through R16 continuous loop)
+function renderHubQueue() {
+  const container = document.getElementById("hubQueueContainer");
+  if (!container) return;
+  container.innerHTML = "";
+  const todayStr = new Date().toISOString().split('T')[0];
+  const queue = [];
+
+  subjects.forEach(s => {
+    if (!s.completed || !s.completedDate) return;
+    if (!s.revs) s.revs = {};
+
+    // Check up to R16 loops ahead
+    for (let r = 1; r <= 16; r++) {
+      const offset = getRevisionOffsetDays(r);
+      const targetDate = addDays(s.completedDate, offset);
+      const isDone = !!s.revs[r];
+
+      if (targetDate === todayStr || (targetDate < todayStr && !isDone)) {
+        let loopLabel = `R${r} (+${offset}d)`;
+        if (r === 1) loopLabel = "R1 (+1d Active Recall)";
+        else if (r === 2) loopLabel = "R2 (+4d Reinforcement)";
+        else if (r === 3) loopLabel = "R3 (+7d Consolidation)";
+        else if (r === 4) loopLabel = "R4 (+21d Long-term Recall)";
+        else if (r % 2 === 1) loopLabel = `R${r} (+${offset}d • 7d Loop)`;
+        else loopLabel = `R${r} (+${offset}d • 21d Loop)`;
+
+        queue.push({
+          subId: s.id,
+          icon: s.icon,
+          name: s.name,
+          marks: s.marks,
+          revNum: r,
+          label: loopLabel,
+          date: targetDate,
+          done: isDone,
+          isOverdue: targetDate < todayStr && !isDone
+        });
+      }
+    }
+  });
+
+  if (queue.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:30px 16px; background:var(--bg-card-subtle); border-radius:var(--radius-lg);">
+        <div style="font-size:32px; margin-bottom:8px;">🩺 🎉</div>
+        <div style="font-weight:800; font-size:14px; color:var(--text-white);">No revisions due right now!</div>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Mark completed lectures in the <strong>19 Subjects Tab</strong> to generate your continuous 1-4-7-21-7-21 review schedule.</div>
+      </div>
+    `;
+    return;
+  }
+
+  queue.forEach(item => {
+    const card = document.createElement("div");
+    card.className = `today-task-card ${item.done ? 'completed' : ''}`;
+    card.innerHTML = `
+      <div style="display:flex; align-items:center; gap:12px;">
+        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleRevStage(${item.subId}, ${item.revNum})" style="width:20px; height:20px; cursor:pointer; accent-color:var(--primary);">
+        <div>
+          <div style="font-weight:800; font-size:14px; display:flex; align-items:center; gap:8px; color:var(--text-white);">
+            <span>${item.icon}</span> ${item.name} (${item.marks}M)
+            ${item.isOverdue ? '<span class="badge badge-hy">⚠️ Overdue</span>' : '<span class="badge badge-pre">🔥 Due Today</span>'}
+          </div>
+          <div style="font-size:11.5px; color:var(--text-muted); margin-top:3px;">
+            ${item.label} • Scheduled for ${formatDateShort(item.date)}
+          </div>
+        </div>
+      </div>
+      <button class="btn-med-outline btn-sm" onclick="toggleRevStage(${item.subId}, ${item.revNum})">${item.done ? 'Undo' : 'Mark Done'}</button>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// HABITS LIST
+function renderHabitsList() {
+  const container = document.getElementById("habitsListContainer");
+  if (!container) return;
+  container.innerHTML = "";
+  const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+  habits.forEach((h, hIdx) => {
+    const div = document.createElement("div");
+    div.className = "habit-row-item";
+    let dots = "";
+    h.days.forEach((act, dIdx) => {
+      dots += `<div class="h-dot ${act ? 'active' : ''}" onclick="toggleHabitDay(${hIdx}, ${dIdx})">${days[dIdx]}</div>`;
+    });
+    div.innerHTML = `
+      <div style="font-size:12.5px; font-weight:700; color:var(--text-white);">${h.name}</div>
+      <div class="habit-dots-box">${dots}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function toggleHabitDay(hIdx, dIdx) {
+  habits[hIdx].days[dIdx] = !habits[hIdx].days[dIdx];
+  saveAllState();
+  renderHabitsList();
+}
+
+function resetHabitsWeek() {
+  if (confirm("Reset habit checkmarks for the new week?")) {
+    habits.forEach(h => h.days = [false, false, false, false, false, false, false]);
+    saveAllState();
+    renderHabitsList();
+  }
+}
+
+// QUICK MCQ LOG
+function logQuickMCQ() {
+  const count = parseInt(document.getElementById("quickMCQCount").value) || 0;
+  if (count <= 0) { alert("Please enter MCQs solved!"); return; }
+  totalMCQMastered += count;
+  saveAllState();
+  document.getElementById("quickMCQCount").value = "";
+  document.getElementById("quickMCQCorrect").value = "";
+  document.getElementById("quickMCQSub").value = "";
+  alert(`✅ Logged +${count} MCQs into your master analytics!`);
+}
+
+// AUDIO SYNTHESIZER & POMODORO
+let pomoInterval = null;
+let pomoSeconds = 25 * 60;
+let isPomoActive = false;
+let audioCtx = null;
+let activeSoundSource = null;
+let currentSoundActive = null;
+
+function formatPomoDisplay(sec) {
+  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const s = (sec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function togglePomodoroState() {
+  const btn = document.getElementById("pomoBtnAction");
+  if (isPomoActive) {
+    clearInterval(pomoInterval);
+    isPomoActive = false;
+    if (btn) btn.innerText = "Start Focus";
+  } else {
+    isPomoActive = true;
+    if (btn) btn.innerText = "Pause";
+    pomoInterval = setInterval(() => {
+      if (pomoSeconds > 0) {
+        pomoSeconds--;
+        const clock = document.getElementById("pomoTimeClock");
+        if (clock) clock.innerText = formatPomoDisplay(pomoSeconds);
+      } else {
+        clearInterval(pomoInterval);
+        isPomoActive = false;
+        if (btn) btn.innerText = "Start Focus";
+        alert("🎉 Focus session completed! Take a 5-minute breather.");
+      }
+    }, 1000);
+  }
+}
+
+function setPomodoroTime(mins) {
+  clearInterval(pomoInterval);
+  isPomoActive = false;
+  const btn = document.getElementById("pomoBtnAction");
+  if (btn) btn.innerText = "Start Focus";
+  pomoSeconds = mins * 60;
+  const clock = document.getElementById("pomoTimeClock");
+  if (clock) clock.innerText = formatPomoDisplay(pomoSeconds);
+}
+
+function initAudioContextSafe() {
+  if (!audioCtx) {
+    const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtxClass) audioCtx = new AudioCtxClass();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playAudioMode(type) {
+  initAudioContextSafe();
+  if (currentSoundActive === type) {
+    stopAudioMode();
+    return;
+  }
+  stopAudioMode();
+  startAudioSynth(type);
+}
+
+function stopAudioMode() {
+  if (activeSoundSource) {
+    try { activeSoundSource.stop(); activeSoundSource.disconnect(); } catch(e){}
+    activeSoundSource = null;
+  }
+  document.querySelectorAll(".sound-btn-synth").forEach(b => b.classList.remove("playing"));
+  currentSoundActive = null;
+}
+
+function startAudioSynth(type) {
+  if (!audioCtx) return;
+
+  const sampleRate = audioCtx.sampleRate;
+  const bufferLen = sampleRate * 2;
+  const buffer = audioCtx.createBuffer(1, bufferLen, sampleRate);
+  const channelData = buffer.getChannelData(0);
+
+  if (type === 'white') {
+    for (let i = 0; i < bufferLen; i++) channelData[i] = Math.random() * 2 - 1;
+  } else if (type === 'rain') {
+    let lastOut = 0.0;
+    for (let i = 0; i < bufferLen; i++) {
+      let white = Math.random() * 2 - 1;
+      channelData[i] = (lastOut + (0.02 * white)) / 1.02;
+      lastOut = channelData[i];
+      channelData[i] *= 3.5;
+    }
+  } else if (type === 'heart') {
+    for (let i = 0; i < bufferLen; i++) {
+      let t = i / sampleRate;
+      let beatCycle = t % 0.85; // 70 bpm
+      if (beatCycle < 0.08) {
+        channelData[i] = Math.sin(2 * Math.PI * 55 * t) * (1 - beatCycle/0.08) * 0.7;
+      } else if (beatCycle > 0.18 && beatCycle < 0.24) {
+        channelData[i] = Math.sin(2 * Math.PI * 75 * t) * (1 - (beatCycle-0.18)/0.06) * 0.5;
+      } else {
+        channelData[i] = 0;
+      }
+    }
+  } else if (type === 'beta') {
+    for (let i = 0; i < bufferLen; i++) {
+      let t = i / sampleRate;
+      channelData[i] = Math.sin(2 * Math.PI * 200 * t) * 0.15 + Math.sin(2 * Math.PI * 240 * t) * 0.15;
+    }
+  }
+
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+  src.loop = true;
+
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0.08;
+
+  src.connect(gain);
+  gain.connect(audioCtx.destination);
+  src.start();
+
+  activeSoundSource = src;
+  currentSoundActive = type;
+
+  const btnMap = { rain: "sndRain", white: "sndWhite", heart: "sndHeart", beta: "sndBeta" };
+  const targetBtn = document.getElementById(btnMap[type]);
+  if (targetBtn) targetBtn.classList.add("playing");
+}
+
+// CALENDAR ENGINE (Continuous R1–R16 Loop Events)
+function shiftCalendarMonth(dir) {
+  calDateState.setMonth(calDateState.getMonth() + dir);
+  renderCalendarGrid();
+}
+
+function resetCalendarToToday() {
+  calDateState = new Date();
+  renderCalendarGrid();
+}
+
+function renderCalendarGrid() {
+  const container = document.getElementById("calendarDaysContainer");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const y = calDateState.getFullYear();
+  const m = calDateState.getMonth();
+  const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  
+  const title = document.getElementById("calendarMonthTitle");
+  if (title) title.innerText = `${mNames[m]} ${y}`;
+
+  const firstDay = new Date(y, m, 1).getDay();
+  const lastDay = new Date(y, m + 1, 0).getDate();
+  const prevLast = new Date(y, m, 0).getDate();
+
+  const events = {};
+  const examIso = `${y}-01-09`;
+  if (!events[examIso]) events[examIso] = [];
+  events[examIso].push({ cls: "ev-exam", lbl: "🏆 FMGE EXAM DAY" });
+
+  subjects.forEach(s => {
+    if (!s.completed || !s.completedDate) return;
+    if (!s.revs) s.revs = {};
+
+    for (let r = 1; r <= 16; r++) {
+      const offset = getRevisionOffsetDays(r);
+      const d = addDays(s.completedDate, offset);
+      if (!d) continue;
+
+      let cls = "ev-r5plus";
+      if (r === 1) cls = "ev-r1";
+      else if (r === 2) cls = "ev-r2";
+      else if (r === 3) cls = "ev-r3";
+      else if (r === 4) cls = "ev-r4";
+
+      if (!events[d]) events[d] = [];
+      events[d].push({
+        cls: cls,
+        lbl: `${s.icon} ${s.name} (R${r})`,
+        done: !!s.revs[r]
+      });
+    }
+  });
+
+  const todayIso = new Date().toISOString().split('T')[0];
+
+  for (let x = firstDay; x > 0; x--) {
+    const dNum = prevLast - x + 1;
+    const cell = document.createElement("div");
+    cell.className = "cal-day-box other-month";
+    cell.innerHTML = `<div class="cal-day-num">${dNum}</div>`;
+    container.appendChild(cell);
+  }
+
+  for (let d = 1; d <= lastDay; d++) {
+    const iso = `${y}-${(m+1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+    const cell = document.createElement("div");
+    cell.className = "cal-day-box";
+    if (iso === todayIso) cell.classList.add("is-today");
+
+    let evHtml = "";
+    if (events[iso]) {
+      events[iso].forEach(ev => {
+        evHtml += `<div class="cal-event-pill ${ev.cls}">${ev.done ? '✓ ' : ''}${ev.lbl}</div>`;
+      });
+    }
+
+    cell.innerHTML = `
+      <div class="cal-day-num">${d}</div>
+      <div style="flex-grow:1; overflow-y:auto; max-height:75px;">${evHtml}</div>
+    `;
+    container.appendChild(cell);
+  }
+
+  const totalSlots = firstDay + lastDay;
+  const remSlots = (7 - (totalSlots % 7)) % 7;
+  for (let k = 1; k <= remSlots; k++) {
+    const cell = document.createElement("div");
+    cell.className = "cal-day-box other-month";
+    cell.innerHTML = `<div class="cal-day-num">${k}</div>`;
+    container.appendChild(cell);
+  }
+}
+
+// 20TH NOTEBOOK / VAULT
+function populateVaultSubjectOptions() {
+  const sel = document.getElementById("vaultSubjectDropdown");
+  const modalSel = document.getElementById("modalInputSubject");
+  if (!sel || !modalSel) return;
+  sel.innerHTML = '<option value="ALL">All Subjects</option>';
+  modalSel.innerHTML = '';
+  subjects.forEach(s => {
+    sel.innerHTML += `<option value="${s.name}">${s.icon} ${s.name}</option>`;
+    modalSel.innerHTML += `<option value="${s.name}">${s.icon} ${s.name}</option>`;
+  });
+}
+
+function renderVaultDeck() {
+  const container = document.getElementById("vaultCardsContainer");
+  if (!container) return;
+  container.innerHTML = "";
+  const query = (document.getElementById("vaultSearchQuery").value || "").toLowerCase();
+  const subFilter = document.getElementById("vaultSubjectDropdown").value;
+
+  const filtered = vaultCards.filter(v => {
+    const matchSub = subFilter === 'ALL' || v.subject === subFilter;
+    const matchText = v.title.toLowerCase().includes(query) || v.content.toLowerCase().includes(query) || v.subject.toLowerCase().includes(query);
+    return matchSub && matchText;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); grid-column: 1/-1;">No matching cards found. Click "Add Volatile Fact" to store key memory anchors!</div>`;
+    return;
+  }
+
+  filtered.forEach(card => {
+    const div = document.createElement("div");
+    div.className = "vault-flashcard";
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="flashcard-topic">${card.subject}</div>
+        <button onclick="deleteVaultCard(${card.id})" style="background:none; border:none; color:var(--alert-rose); cursor:pointer; font-size:12px;">Delete</button>
+      </div>
+      <div class="flashcard-title">${card.title}</div>
+      <div class="flashcard-body">${card.content.replace(/\n/g, '<br>')}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function openVaultModal() { 
+  const el = document.getElementById("vaultAddModal");
+  if (el) el.style.display = "flex"; 
+}
+
+function closeVaultModal() { 
+  const el = document.getElementById("vaultAddModal");
+  if (el) el.style.display = "none"; 
+}
+
+function saveVaultItem() {
+  const subject = document.getElementById("modalInputSubject").value;
+  const title = document.getElementById("modalInputTitle").value.trim();
+  const content = document.getElementById("modalInputContent").value.trim();
+
+  if (!title || !content) { alert("Please enter title and content!"); return; }
+
+  vaultCards.unshift({ id: Date.now(), subject, title, content });
+  saveAllState();
+  renderVaultDeck();
+  closeVaultModal();
+  document.getElementById("modalInputTitle").value = "";
+  document.getElementById("modalInputContent").value = "";
+}
+
+function deleteVaultCard(id) {
+  vaultCards = vaultCards.filter(c => c.id !== id);
+  saveAllState();
+  renderVaultDeck();
+}
+
+// GRAND TEST ANALYTICS
+function saveGrandTest(e) {
+  e.preventDefault();
+  const name = document.getElementById("gtFormName").value;
+  const date = document.getElementById("gtFormDate").value;
+  const score = parseInt(document.getElementById("gtFormScore").value);
+  const p1 = document.getElementById("gtFormP1").value || "-";
+  const p2 = document.getElementById("gtFormP2").value || "-";
+  const weak = document.getElementById("gtFormWeak").value || "-";
+
+  grandTests.unshift({ id: Date.now(), name, date, score, p1, p2, weak });
+  saveAllState();
+  renderGTTable();
+  e.target.reset();
+  const gtDateInput = document.getElementById("gtFormDate");
+  if (gtDateInput) gtDateInput.valueAsDate = new Date();
+}
+
+function deleteGTRecord(id) {
+  grandTests = grandTests.filter(g => g.id !== id);
+  saveAllState();
+  renderGTTable();
+}
+
+function renderGTTable() {
+  const tbody = document.getElementById("gtTableHistoryBody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  if (grandTests.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:16px;">No Grand Tests recorded yet.</td></tr>`;
+    return;
+  }
+
+  grandTests.forEach(gt => {
+    const isPass = gt.score >= 150;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${gt.name}</strong><br><small style="color:var(--text-muted);">Focus: ${gt.weak}</small></td>
+      <td>${formatDateShort(gt.date)}</td>
+      <td><strong style="font-size:14px; font-family:var(--font-mono);">${gt.score}</strong> / 300</td>
+      <td><small>P1: ${gt.p1} | P2: ${gt.p2}</small></td>
+      <td><span class="badge ${isPass ? 'badge-success' : 'badge-hy'}">${isPass ? '✓ Passing (>=150)' : '⚠️ Needs Push'}</span></td>
+      <td><button class="btn-med-outline btn-sm" onclick="deleteGTRecord(${gt.id})">Delete</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// UPDATE VITALS BAR (Scans all active stages)
+function updateVitalsBar() {
+  const completedList = subjects.filter(s => s.completed);
+  const marksCovered = completedList.reduce((sum, curr) => sum + curr.marks, 0);
+
+  const subEl = document.getElementById("vitalSubjects");
+  if (subEl) subEl.innerText = `${completedList.length} / 19`;
+
+  const markEl = document.getElementById("vitalMarks");
+  if (markEl) markEl.innerText = `${marksCovered} / 300`;
+
+  const pctEl = document.getElementById("vitalMarksPercent");
+  if (pctEl) pctEl.innerText = `${Math.round((marksCovered / 300) * 100)}% Syllabus Done`;
+
+  const mcqEl = document.getElementById("vitalMCQs");
+  if (mcqEl) mcqEl.innerText = totalMCQMastered.toLocaleString();
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  let dueCount = 0;
+  let overdueCount = 0;
+
+  subjects.forEach(s => {
+    if (!s.completed || !s.completedDate) return;
+    if (!s.revs) s.revs = {};
+    for (let r = 1; r <= 16; r++) {
+      const offset = getRevisionOffsetDays(r);
+      const target = addDays(s.completedDate, offset);
+      const isDone = !!s.revs[r];
+      if (target === todayStr) dueCount++;
+      if (target < todayStr && !isDone) overdueCount++;
+    }
+  });
+
+  const dueEl = document.getElementById("vitalDueToday");
+  if (dueEl) dueEl.innerText = (dueCount + overdueCount).toString();
+
+  const odEl = document.getElementById("vitalOverdueSub");
+  if (odEl) odEl.innerText = `${overdueCount} Overdue topics`;
+
+  const gtEl = document.getElementById("vitalGTScore");
+  if (gtEl && grandTests.length > 0) {
+    gtEl.innerText = `${grandTests[0].score} / 300`;
+  }
+}
+
+// BACKUP / RESTORE
+function exportDataJson() {
+  const payload = { subjects, vaultCards, grandTests, habits, totalMCQMastered };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "FMGE_Grandmaster_OS_Backup.json";
+  a.click();
+}
+
+function importDataJsonPrompt() {
+  const text = prompt("Paste your JSON backup data string:");
+  if (!text) return;
+  try {
+    const data = JSON.parse(text);
+    if (data.subjects) subjects = data.subjects;
+    if (data.vaultCards) vaultCards = data.vaultCards;
+    if (data.grandTests) grandTests = data.grandTests;
+    if (data.habits) habits = data.habits;
+    if (data.totalMCQMastered !== undefined) totalMCQMastered = data.totalMCQMastered;
+    saveAllState();
+    renderSubjectTable();
+    renderHubQueue();
+    renderHabitsList();
+    renderVaultDeck();
+    renderGTTable();
+    renderCalendarGrid();
+    alert("✅ All FMGE Command Center data restored successfully!");
+  } catch(e) {
+    alert("Invalid backup JSON string.");
+  }
+}
+
+// PWA INSTALL FEATURE
+let fmgeInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  fmgeInstallPrompt = event;
+  const btn = document.getElementById("installAppBtn");
+  if (btn) btn.style.display = "inline-flex";
+});
+
+window.addEventListener("appinstalled", () => {
+  fmgeInstallPrompt = null;
+  const btn = document.getElementById("installAppBtn");
+  if (btn) btn.style.display = "none";
+});
+
+async function installFMGEApp() {
+  if (!fmgeInstallPrompt) {
+    alert("To install FMGE Grandmaster, open this page through Chrome or Brave over HTTPS, then use the browser menu → Install app / Add to Home screen.");
+    return;
+  }
+  fmgeInstallPrompt.prompt();
+  await fmgeInstallPrompt.userChoice;
+  fmgeInstallPrompt = null;
+  const btn = document.getElementById("installAppBtn");
+  if (btn) btn.style.display = "none";
+}
+
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+
+</script>
+
+</body>
+</html>
